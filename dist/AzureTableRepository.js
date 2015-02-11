@@ -78,7 +78,7 @@ var AzureTableRepository = (function () {
                 return new Promise(function (res, rej) {
                     _this.storageClient.insertEntity(_this.tableName, updatedEntity.toJS(), function (error, result) {
                         if (error) rej(error);else {
-                            res(Immutable.OrderedMap(result));
+                            res(result);
                         }
                     });
                 });
@@ -110,7 +110,7 @@ var AzureTableRepository = (function () {
                 return new Promise(function (res, rej) {
                     _this.storageClient.updateEntity(_this.tableName, entity.toJS(), function (error, result) {
                         if (error) rej(error);else {
-                            res(Immutable.OrderedMap(result));
+                            res(result);
                         }
                     });
                 });
@@ -126,7 +126,7 @@ var AzureTableRepository = (function () {
                 return new Promise(function (res, rej) {
                     _this.storageClient.deleteEntity(_this.tableName, entity.toJS(), function (error, result) {
                         if (error) rej(error);else {
-                            res(Immutable.OrderedMap(result));
+                            res(result);
                         }
                     });
                 });

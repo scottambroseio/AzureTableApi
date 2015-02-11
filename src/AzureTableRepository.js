@@ -11,9 +11,7 @@ function validateConstructorArgs(accountName, accountKey, tableName, partitionKe
         throw "All four arguments are required";
 
     // Check all are strings and have a body
-    var result = _.every(arguments, element => {
-        return typeof (element) === "string" && element.length;
-    });
+    var result = _.every(arguments, element => typeof (element) === "string" && element.length);
 
     if (!result)
         throw "All provided arguments must be strings which aren't empty";
@@ -63,7 +61,7 @@ export default class AzureTableRepository {
                 if (error)
                     rej(error);
                 else {
-                    res(Immutable.OrderedMap(result));
+                    res(result);
                 }
             });
         });
@@ -91,7 +89,7 @@ export default class AzureTableRepository {
                 if (error)
                     rej(error);
                 else {
-                    res(Immutable.OrderedMap(result));
+                    res(result);
                 }
             });
         });
@@ -105,7 +103,7 @@ export default class AzureTableRepository {
                 if (error)
                     rej(error);
                 else {
-                    res(Immutable.OrderedMap(result));
+                    res(result);
                 }
             });
         });
