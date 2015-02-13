@@ -1,5 +1,5 @@
 {
-  "name": "AzureTableRepository",
+  "name": "AzureTableApi",
   "version": "1.0.0",
   "private": true,
   "author": "Scott Ranger",
@@ -7,7 +7,6 @@
   "dependencies": {
     "azure-storage": "^0.4.2",
     "immutable": "^3.6.2",
-    "nconf": "^0.7.1",
     "node-uuid": "^1.4.2",
     "lodash": "^3.1.0"
   },
@@ -16,7 +15,8 @@
     "gulp": "^3.8.11",
     "gulp-6to5": "^3.0.0",
     "mocha": "^2.1.0",
-    "should": "^5.0.0"
+    "should": "^5.0.0",
+    "nconf": "^0.7.1"
   },
   "scripts": {
     "test": "mocha --harmony"

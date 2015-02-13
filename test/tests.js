@@ -27,7 +27,6 @@ describe('AzureTableRepository', function () {
 		service = azure.createTableService(azure.generateDevelopmentStorageCredendentials());
 	});
 
-
 	describe('when created', function () {
 		afterEach(function (done) {
 			DeleteTable(done);
