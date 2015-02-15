@@ -16,26 +16,23 @@ var nconf = _interopRequire(require("nconf"));
 
 nconf.env().file({ file: "config.json" });
 
-var accountName = nconf.get("STORAGE_NAME");
-var accountKey = nconf.get("STORAGE_KEY");
-
 function validateConstructorArgs(tableName, partitionKey) {
     if (arguments.length < 2) throw "All arguments are required";
 
-    var result = _.every(arguments, function (element) {
-        return typeof element === "string" && element;
-    });
-
-    if (!result) throw "All provided arguments must be strings which aren't empty";
+    _.each(arguments, validateString);
 }
 
 function validateEntity(entity) {
     if (!(entity instanceof AzureTableEntity)) throw "The entity must be an instance of AzureTableEntity";
 }
 
-function validateRowKey(rowkey) {
-    if (typeof rowkey !== "string" || !rowkey) throw "Invalid rowkey";
+function validateString(string) {
+    if (typeof string !== "string" || !string) throw "Invalid string";
 }
+
+var TABLE_NAME = Symbol();
+var PARTITION_KEY = Symbol();
+var STORAGE_CLIENT = Symbol();
 
 var AzureTableRepository = (function () {
     function AzureTableRepository(tableName, partitionKey) {
@@ -44,13 +41,19 @@ var AzureTableRepository = (function () {
         validateConstructorArgs.apply(null, arguments);
 
         if (nconf.get("NODE_ENV") === "debug") {
-            this.storageClient = azure.createTableService(azure.generateDevelopmentStorageCredendentials());
+            this[STORAGE_CLIENT] = azure.createTableService(azure.generateDevelopmentStorageCredendentials());
         } else {
-            this.storageClient = azure.createTableService(accountName, accountKey);
+            var accountName = nconf.get("STORAGE_NAME");
+            var accountKey = nconf.get("STORAGE_KEY");
+
+            validateString(accountName);
+            validateString(accountKey);
+
+            this[STORAGE_CLIENT] = azure.createTableService(accountName, accountKey);
         }
 
-        this.tableName = tableName;
-        this.partitionKey = partitionKey;
+        this[TABLE_NAME] = tableName;
+        this[PARTITION_KEY] = partitionKey;
     }
 
     _prototypeProperties(AzureTableRepository, null, {
@@ -58,7 +61,7 @@ var AzureTableRepository = (function () {
             value: function Init() {
                 var _this = this;
                 return new Promise(function (res, rej) {
-                    _this.storageClient.createTableIfNotExists(_this.tableName, function (error) {
+                    _this[STORAGE_CLIENT].createTableIfNotExists(_this[TABLE_NAME], function (error) {
                         if (error) rej(error);else {
                             res();
                         }
@@ -73,10 +76,10 @@ var AzureTableRepository = (function () {
                 var _this = this;
                 validateEntity(entity);
 
-                var updatedEntity = entity.set("PartitionKey", this.partitionKey);
+                var updatedEntity = entity.set("PartitionKey", this[PARTITION_KEY]);
 
                 return new Promise(function (res, rej) {
-                    _this.storageClient.insertEntity(_this.tableName, updatedEntity.toJS(), function (error, result) {
+                    _this[STORAGE_CLIENT].insertEntity(_this[TABLE_NAME], updatedEntity.toJS(), function (error, result) {
                         if (error) rej(error);else {
                             res(result);
                         }
@@ -89,10 +92,10 @@ var AzureTableRepository = (function () {
         Retrieve: {
             value: function Retrieve(rowkey) {
                 var _this = this;
-                validateRowKey(rowkey);
+                validateString(rowkey);
 
                 return new Promise(function (res, rej) {
-                    _this.storageClient.retrieveEntity(_this.tableName, _this.partitionKey, rowkey, function (error, result) {
+                    _this[STORAGE_CLIENT].retrieveEntity(_this[TABLE_NAME], _this[PARTITION_KEY], rowkey, function (error, result) {
                         if (error) rej(error);else {
                             res(AzureTableEntity.createEntityFromSource(result));
                         }
@@ -108,7 +111,7 @@ var AzureTableRepository = (function () {
                 validateEntity(entity);
 
                 return new Promise(function (res, rej) {
-                    _this.storageClient.updateEntity(_this.tableName, entity.toJS(), function (error, result) {
+                    _this[STORAGE_CLIENT].updateEntity(_this[TABLE_NAME], entity.toJS(), function (error, result) {
                         if (error) rej(error);else {
                             res(result);
                         }
@@ -124,7 +127,7 @@ var AzureTableRepository = (function () {
                 validateEntity(entity);
 
                 return new Promise(function (res, rej) {
-                    _this.storageClient.deleteEntity(_this.tableName, entity.toJS(), function (error, result) {
+                    _this[STORAGE_CLIENT].deleteEntity(_this[TABLE_NAME], entity.toJS(), function (error, result) {
                         if (error) rej(error);else {
                             res(result);
                         }
@@ -138,8 +141,9 @@ var AzureTableRepository = (function () {
             value: function Query(query) {
                 var _this = this;
                 return new Promise(function (res, rej) {
-                    _this.storageClient.queryEntities(_this.tableName, query, null, function (error, result, response) {
+                    _this[STORAGE_CLIENT].queryEntities(_this[TABLE_NAME], query, null, function (error, result, response) {
                         if (error) rej(error);else {
+                            console.log(result.entries);
                             var entitys = _.map(result.entries, function (source) {
                                 return AzureTableEntity.createEntityFromSource(source);
                             });
