@@ -7,8 +7,9 @@
   "dependencies": {
     "azure-storage": "^0.4.2",
     "immutable": "^3.6.2",
-    "node-uuid": "^1.4.2",
-    "lodash": "^3.1.0"
+    "lodash": "^3.1.0",
+    "nconf": "^0.7.1",
+    "node-uuid": "^1.4.2"
   },
   "devDependencies": {
     "co": "^4.3.1",

@@ -1,5 +1,5 @@
 interface AzureTableEntity_Instance {
-	get(key): any;
+	get<T>(key): T;
 	set(key, value): AzureTableEntity_Instance;
 	toJS(): Object;
 }

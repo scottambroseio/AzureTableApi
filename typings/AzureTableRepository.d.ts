@@ -8,7 +8,7 @@ interface AzureTableRepository_Instance {
 }
 
 interface AzureTableRepository_Static {
-	new(accountName: string, accountKey: string, tableName: string, partitionKey: string): AzureTableRepository_Instance;
+	new(tableName: string, partitionKey: string): AzureTableRepository_Instance;
 }
 
 declare var AzureTableRepository: AzureTableRepository_Static;

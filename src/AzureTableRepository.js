@@ -3,15 +3,20 @@ import _ from 'lodash';
 import Immutable from 'Immutable';
 import uuid from "node-uuid";
 import AzureTableEntity from "./AzureTableEntity";
+import nconf from 'nconf';
 
+nconf.env().file({ file: 'config.json'});
+
+var accountName = nconf.get("STORAGE_NAME");
+var accountKey = nconf.get("STORAGE_KEY");
 var entGen = azure.TableUtilities.entityGenerator;
 
-function validateConstructorArgs(accountName, accountKey, tableName, partitionKey) {
-    if (arguments.length !== 4)
-        throw "All four arguments are required";
+function validateConstructorArgs(tableName, partitionKey) {
+    if (arguments.length < 2)
+        throw "All arguments are required";
 
     // Check all are strings and have a body
-    var result = _.every(arguments, element => typeof (element) === "string" && element.length);
+    var result = _.every(arguments, element => typeof (element) === "string" && element);
 
     if (!result)
         throw "All provided arguments must be strings which aren't empty";
@@ -22,11 +27,11 @@ function validateEntity(entity) {
 }
 
 function validateRowKey(rowkey) {
-    return typeof(rowkey) !== "string" || !rowkey.length;
+    if (typeof(rowkey) !== "string" || !rowkey) throw "Invalid rowkey";
 }
 
 export default class AzureTableRepository {
-    constructor(accountName, accountKey, tableName, partitionKey) {
+    constructor(tableName, partitionKey) {
         validateConstructorArgs.apply(null, arguments);
 
         if (process.env.NODE_ENV === "debug") {
