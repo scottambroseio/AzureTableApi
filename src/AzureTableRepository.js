@@ -1,21 +1,17 @@
 import azure from 'azure-storage';
 import _ from 'lodash';
-import Immutable from 'Immutable';
-import uuid from "node-uuid";
 import AzureTableEntity from "./AzureTableEntity";
 import nconf from 'nconf';
 
-nconf.env().file({ file: 'config.json'});
+nconf.env().file({ file: 'config.json' });
 
 var accountName = nconf.get("STORAGE_NAME");
 var accountKey = nconf.get("STORAGE_KEY");
-var entGen = azure.TableUtilities.entityGenerator;
 
 function validateConstructorArgs(tableName, partitionKey) {
     if (arguments.length < 2)
         throw "All arguments are required";
 
-    // Check all are strings and have a body
     var result = _.every(arguments, element => typeof (element) === "string" && element);
 
     if (!result)
@@ -23,7 +19,7 @@ function validateConstructorArgs(tableName, partitionKey) {
 }
 
 function validateEntity(entity) {
-    if (!(entity instanceof AzureTableEntity)) throw "the entity must be an instance of AzureTableEntity"
+    if (!(entity instanceof AzureTableEntity)) throw "The entity must be an instance of AzureTableEntity"
 }
 
 function validateRowKey(rowkey) {
@@ -34,7 +30,7 @@ export default class AzureTableRepository {
     constructor(tableName, partitionKey) {
         validateConstructorArgs.apply(null, arguments);
 
-        if (process.env.NODE_ENV === "debug") {
+        if (nconf.get("NODE_ENV") === "debug") {
             this.storageClient = azure.createTableService(azure.generateDevelopmentStorageCredendentials());
         } else {
             this.storageClient = azure.createTableService(accountName, accountKey);

@@ -5,29 +5,31 @@ import uuid from "node-uuid";
 
 var entGen = azure.TableUtilities.entityGenerator;
 
+var VALUE = Symbol();
+
 export default class AzureTableEntity {
 	constructor() {
-		this.value = Immutable.OrderedMap({ RowKey: entGen.String(uuid()) });
+		this[VALUE] = Immutable.OrderedMap({ RowKey: entGen.String(uuid()) });
 	}
 
 	get(key) {
-		return this.value.get(key)['_'];
+		return this[VALUE].get(key)['_'];
 	}
 
 	set(key, value) {
-		this.value = this.value.set(key, getEdmValue(value));
+		this[VALUE] = this[VALUE].set(key, getEdmValue(value));
 
 		return this;
 	}
 
 	toJS() {
-		return this.value.toJS();
+		return this[VALUE].toJS();
 	}
 
 	static createEntityFromSource(source) {
 		var entity = new AzureTableEntity();
 
-		entity.value = Immutable.OrderedMap(source);
+		entity[VALUE] = Immutable.OrderedMap(source);
 		
 		return entity;
 	}

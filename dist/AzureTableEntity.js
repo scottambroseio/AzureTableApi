@@ -16,11 +16,13 @@ var uuid = _interopRequire(require("node-uuid"));
 
 var entGen = azure.TableUtilities.entityGenerator;
 
+var VALUE = Symbol();
+
 var AzureTableEntity = (function () {
 	function AzureTableEntity() {
 		_classCallCheck(this, AzureTableEntity);
 
-		this.value = Immutable.OrderedMap({ RowKey: entGen.String(uuid()) });
+		this[VALUE] = Immutable.OrderedMap({ RowKey: entGen.String(uuid()) });
 	}
 
 	_prototypeProperties(AzureTableEntity, {
@@ -28,7 +30,7 @@ var AzureTableEntity = (function () {
 			value: function createEntityFromSource(source) {
 				var entity = new AzureTableEntity();
 
-				entity.value = Immutable.OrderedMap(source);
+				entity[VALUE] = Immutable.OrderedMap(source);
 
 				return entity;
 			},
@@ -38,14 +40,14 @@ var AzureTableEntity = (function () {
 	}, {
 		get: {
 			value: function get(key) {
-				return this.value.get(key)._;
+				return this[VALUE].get(key)._;
 			},
 			writable: true,
 			configurable: true
 		},
 		set: {
 			value: function set(key, value) {
-				this.value = this.value.set(key, getEdmValue(value));
+				this[VALUE] = this[VALUE].set(key, getEdmValue(value));
 
 				return this;
 			},
@@ -54,7 +56,7 @@ var AzureTableEntity = (function () {
 		},
 		toJS: {
 			value: function toJS() {
-				return this.value.toJS();
+				return this[VALUE].toJS();
 			},
 			writable: true,
 			configurable: true
