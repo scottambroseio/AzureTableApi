@@ -35,10 +35,10 @@ export default class AzureTableEntity {
 	}
 }
 
-
 function getEdmValue(value) {
 	if (_.isString(value)) return entGen.String(value);
-	if (_.isNumber(value)) return entGen.Int32(value);
+	if (_.isNumber(value) && value % 1 === 0) return entGen.Int32(value);
+	if (_.isNumber(value) && value % 1 !== 0) return entGen.Double(value);
 	if (_.isBoolean(value)) return entGen.Boolean(value);
 	if (_.isDate(value)) return entGen.DateTime(value);
 	
