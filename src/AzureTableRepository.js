@@ -127,4 +127,16 @@ export default class AzureTableRepository {
             });
         });
     }
+
+    Batch(batch) {
+        return new Promise((res, rej) => {
+            this[STORAGE_CLIENT].executeBatch(this[TABLE_NAME], batch, (error, result, response) => {
+                if (error)
+                    rej(error);
+                else {
+                    res(result);
+                }
+            });           
+        });
+    }
 }

@@ -7,6 +7,7 @@ interface AzureTableRepository_Instance {
 	Update(entity: AzureTableEntity_Instance): Promise;
 	Delete(entity: AzureTableEntity_Instance): Promise;
 	Query(query): Promise;
+	Batch(batch): Promise;
 }
 
 interface AzureTableRepository_Static {

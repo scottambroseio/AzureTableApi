@@ -143,12 +143,23 @@ var AzureTableRepository = (function () {
                 return new Promise(function (res, rej) {
                     _this[STORAGE_CLIENT].queryEntities(_this[TABLE_NAME], query, null, function (error, result, response) {
                         if (error) rej(error);else {
-                            console.log(result.entries);
-                            var entitys = _.map(result.entries, function (source) {
-                                return AzureTableEntity.createEntityFromSource(source);
-                            });
+                            var entitys = result.entries.map(AzureTableEntity.createEntityFromSource);
 
                             res(entitys);
+                        }
+                    });
+                });
+            },
+            writable: true,
+            configurable: true
+        },
+        Batch: {
+            value: function Batch(batch) {
+                var _this = this;
+                return new Promise(function (res, rej) {
+                    _this[STORAGE_CLIENT].executeBatch(_this[TABLE_NAME], batch, function (error, result, response) {
+                        if (error) rej(error);else {
+                            res(result);
                         }
                     });
                 });
