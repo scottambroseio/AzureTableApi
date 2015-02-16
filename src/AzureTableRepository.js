@@ -1,5 +1,5 @@
-import azure from 'azure-storage';
-import _ from 'lodash';
+import { createTableService, generateDevelopmentStorageCredendentials } from 'azure-storage';
+import { each } from 'lodash';
 import AzureTableEntity from "./AzureTableEntity";
 import nconf from 'nconf';
 
@@ -9,7 +9,7 @@ function validateConstructorArgs(tableName, partitionKey) {
     if (arguments.length < 2)
         throw "All arguments are required";
 
-    _.each(arguments, validateString);
+    each(arguments, validateString);
 }
 
 function validateEntity(entity) {
@@ -20,16 +20,16 @@ function validateString(string) {
     if (typeof(string) !== "string" || !string) throw "Invalid string";
 }
 
-var TABLE_NAME = Symbol();
-var PARTITION_KEY = Symbol();
-var STORAGE_CLIENT = Symbol();
+let TABLE_NAME = Symbol();
+let PARTITION_KEY = Symbol();
+let STORAGE_CLIENT = Symbol();
 
 export default class AzureTableRepository {
     constructor(tableName, partitionKey) {
         validateConstructorArgs.apply(null, arguments);
 
         if (nconf.get("NODE_ENV") === "debug") {
-            this[STORAGE_CLIENT] = azure.createTableService(azure.generateDevelopmentStorageCredendentials());
+            this[STORAGE_CLIENT] = createTableService(generateDevelopmentStorageCredendentials());
         } else {
             let accountName = nconf.get("STORAGE_NAME");
             let accountKey = nconf.get("STORAGE_KEY");
@@ -37,7 +37,7 @@ export default class AzureTableRepository {
             validateString(accountName);
             validateString(accountKey);
 
-            this[STORAGE_CLIENT] = azure.createTableService(accountName, accountKey);
+            this[STORAGE_CLIENT] = createTableService(accountName, accountKey);
         }
 
         this[TABLE_NAME] = tableName;
@@ -59,7 +59,7 @@ export default class AzureTableRepository {
     Create(entity) {
         validateEntity(entity);
 
-        var updatedEntity = entity.set('PartitionKey', this[PARTITION_KEY]);
+        let updatedEntity = entity.set('PartitionKey', this[PARTITION_KEY]);
 
         return new Promise((res, rej) => {
             this[STORAGE_CLIENT].insertEntity(this[TABLE_NAME], updatedEntity.toJS(), (error, result) => {

@@ -1,9 +1,11 @@
 var gulp = require('gulp');
-var to5 = require('gulp-6to5');
+var babel = require('gulp-babel');
 
 gulp.task('compile', function () {
     return gulp.src('src/**/*.js')
-        .pipe(to5())
+        .pipe(babel({
+        	blacklist: [ 'regenerator' ]
+        }))
         .pipe(gulp.dest('dist'));
 });
 

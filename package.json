@@ -14,7 +14,7 @@
   "devDependencies": {
     "co": "^4.3.1",
     "gulp": "^3.8.11",
-    "gulp-6to5": "^3.0.0",
+    "gulp-babel": "^4.0.0",
     "mocha": "^2.1.0",
     "should": "^5.0.0"
   },

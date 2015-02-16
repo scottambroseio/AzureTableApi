@@ -6,15 +6,19 @@ var _prototypeProperties = function (child, staticProps, instanceProps) { if (st
 
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
 
-var azure = _interopRequire(require("azure-storage"));
+var TableUtilities = require("azure-storage").TableUtilities;
+var _lodash = require("lodash");
 
-var _ = _interopRequire(require("lodash"));
-
+var isString = _lodash.isString;
+var isNumber = _lodash.isNumber;
+var isBoolean = _lodash.isBoolean;
+var isDate = _lodash.isDate;
 var Immutable = _interopRequire(require("Immutable"));
 
 var uuid = _interopRequire(require("node-uuid"));
 
-var entGen = azure.TableUtilities.entityGenerator;
+var entityGenerator = TableUtilities.entityGenerator;
+
 
 var VALUE = Symbol();
 
@@ -22,7 +26,7 @@ var AzureTableEntity = (function () {
 	function AzureTableEntity() {
 		_classCallCheck(this, AzureTableEntity);
 
-		this[VALUE] = Immutable.OrderedMap({ RowKey: entGen.String(uuid()) });
+		this[VALUE] = Immutable.OrderedMap({ RowKey: entityGenerator.String(uuid()) });
 	}
 
 	_prototypeProperties(AzureTableEntity, {
@@ -70,15 +74,15 @@ module.exports = AzureTableEntity;
 
 
 function getEdmValue(value) {
-	if (_.isString(value)) {
-		return entGen.String(value);
-	}if (_.isNumber(value) && value % 1 === 0) {
-		return entGen.Int32(value);
-	}if (_.isNumber(value) && value % 1 !== 0) {
-		return entGen.Double(value);
-	}if (_.isBoolean(value)) {
-		return entGen.Boolean(value);
-	}if (_.isDate(value)) {
-		return entGen.DateTime(value);
+	if (isString(value)) {
+		return entityGenerator.String(value);
+	}if (isNumber(value) && value % 1 === 0) {
+		return entityGenerator.Int32(value);
+	}if (isNumber(value) && value % 1 !== 0) {
+		return entityGenerator.Double(value);
+	}if (isBoolean(value)) {
+		return entityGenerator.Boolean(value);
+	}if (isDate(value)) {
+		return entityGenerator.DateTime(value);
 	}throw "The values data type isn't currently supported";
 }

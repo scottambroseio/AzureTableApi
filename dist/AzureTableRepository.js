@@ -6,10 +6,11 @@ var _prototypeProperties = function (child, staticProps, instanceProps) { if (st
 
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
 
-var azure = _interopRequire(require("azure-storage"));
+var _azureStorage = require("azure-storage");
 
-var _ = _interopRequire(require("lodash"));
-
+var createTableService = _azureStorage.createTableService;
+var generateDevelopmentStorageCredendentials = _azureStorage.generateDevelopmentStorageCredendentials;
+var each = require("lodash").each;
 var AzureTableEntity = _interopRequire(require("./AzureTableEntity"));
 
 var nconf = _interopRequire(require("nconf"));
@@ -19,7 +20,7 @@ nconf.env().file({ file: "config.json" });
 function validateConstructorArgs(tableName, partitionKey) {
     if (arguments.length < 2) throw "All arguments are required";
 
-    _.each(arguments, validateString);
+    each(arguments, validateString);
 }
 
 function validateEntity(entity) {
@@ -41,7 +42,7 @@ var AzureTableRepository = (function () {
         validateConstructorArgs.apply(null, arguments);
 
         if (nconf.get("NODE_ENV") === "debug") {
-            this[STORAGE_CLIENT] = azure.createTableService(azure.generateDevelopmentStorageCredendentials());
+            this[STORAGE_CLIENT] = createTableService(generateDevelopmentStorageCredendentials());
         } else {
             var accountName = nconf.get("STORAGE_NAME");
             var accountKey = nconf.get("STORAGE_KEY");
@@ -49,7 +50,7 @@ var AzureTableRepository = (function () {
             validateString(accountName);
             validateString(accountKey);
 
-            this[STORAGE_CLIENT] = azure.createTableService(accountName, accountKey);
+            this[STORAGE_CLIENT] = createTableService(accountName, accountKey);
         }
 
         this[TABLE_NAME] = tableName;
