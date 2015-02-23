@@ -3,13 +3,13 @@ import { isString, isNumber, isBoolean, isDate } from 'lodash';
 import Immutable from 'Immutable';
 import uuid from "node-uuid";
 
-let { entityGenerator } = TableUtilities;
+const { entityGenerator: ENTITY_GENERATOR } = TableUtilities;
 
-let VALUE = Symbol();
+const VALUE = Symbol();
 
 export default class AzureTableEntity {
 	constructor() {
-		this[VALUE] = Immutable.OrderedMap({ RowKey: entityGenerator.String(uuid()) });
+		this[VALUE] = Immutable.OrderedMap({ RowKey: ENTITY_GENERATOR.String(uuid()) });
 	}
 
 	get(key) {
@@ -27,20 +27,20 @@ export default class AzureTableEntity {
 	}
 
 	static createEntityFromSource(source) {
-		let entity = new AzureTableEntity();
+		const ENTITY = new AzureTableEntity();
 
-		entity[VALUE] = Immutable.OrderedMap(source);
+		ENTITY[VALUE] = Immutable.OrderedMap(source);
 		
-		return entity;
+		return ENTITY;
 	}
 }
 
 function getEdmValue(value) {
-	if (isString(value)) return entityGenerator.String(value);
-	if (isNumber(value) && value % 1 === 0) return entityGenerator.Int32(value);
-	if (isNumber(value) && value % 1 !== 0) return entityGenerator.Double(value);
-	if (isBoolean(value)) return entityGenerator.Boolean(value);
-	if (isDate(value)) return entityGenerator.DateTime(value);
+	if (isString(value)) return ENTITY_GENERATOR.String(value);
+	if (isNumber(value) && value % 1 === 0) return ENTITY_GENERATOR.Int32(value);
+	if (isNumber(value) && value % 1 !== 0) return ENTITY_GENERATOR.Double(value);
+	if (isBoolean(value)) return ENTITY_GENERATOR.Boolean(value);
+	if (isDate(value)) return ENTITY_GENERATOR.DateTime(value);
 	
 	throw "The values data type isn't currently supported";
 }
