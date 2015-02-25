@@ -10,12 +10,13 @@ var _azureStorage = require("azure-storage");
 
 var createTableService = _azureStorage.createTableService;
 var generateDevelopmentStorageCredendentials = _azureStorage.generateDevelopmentStorageCredendentials;
+var TableQuery = _azureStorage.TableQuery;
 var each = require("lodash").each;
 var AzureTableEntity = _interopRequire(require("./AzureTableEntity"));
 
 var nconf = _interopRequire(require("nconf"));
 
-nconf.env().file({ file: "config.json" });
+nconf.env().file({ file: "../config.json" });
 
 function validateConstructorArgs(tableName, partitionKey) {
     if (arguments.length < 2) throw "All arguments are required";
@@ -31,9 +32,9 @@ function validateString(string) {
     if (typeof string !== "string" || !string) throw "Invalid string";
 }
 
-var TABLE_NAME = Symbol();
-var PARTITION_KEY = Symbol();
-var STORAGE_CLIENT = Symbol();
+var TableName = Symbol();
+var PartitionKey = Symbol();
+var StorageClient = Symbol();
 
 var AzureTableRepository = (function () {
     function AzureTableRepository(tableName, partitionKey) {
@@ -42,7 +43,7 @@ var AzureTableRepository = (function () {
         validateConstructorArgs.apply(null, arguments);
 
         if (nconf.get("NODE_ENV") === "debug") {
-            this[STORAGE_CLIENT] = createTableService(generateDevelopmentStorageCredendentials());
+            this[StorageClient] = createTableService(generateDevelopmentStorageCredendentials());
         } else {
             var accountName = nconf.get("STORAGE_NAME");
             var accountKey = nconf.get("STORAGE_KEY");
@@ -50,11 +51,11 @@ var AzureTableRepository = (function () {
             validateString(accountName);
             validateString(accountKey);
 
-            this[STORAGE_CLIENT] = createTableService(accountName, accountKey);
+            this[StorageClient] = createTableService(accountName, accountKey);
         }
 
-        this[TABLE_NAME] = tableName;
-        this[PARTITION_KEY] = partitionKey;
+        this[TableName] = tableName;
+        this[PartitionKey] = partitionKey;
     }
 
     _prototypeProperties(AzureTableRepository, null, {
@@ -62,7 +63,7 @@ var AzureTableRepository = (function () {
             value: function Init() {
                 var _this = this;
                 return new Promise(function (res, rej) {
-                    _this[STORAGE_CLIENT].createTableIfNotExists(_this[TABLE_NAME], function (error) {
+                    _this[StorageClient].createTableIfNotExists(_this[TableName], function (error) {
                         if (error) rej(error);else {
                             res();
                         }
@@ -77,10 +78,10 @@ var AzureTableRepository = (function () {
                 var _this = this;
                 validateEntity(entity);
 
-                var updatedEntity = entity.set("PartitionKey", this[PARTITION_KEY]);
+                var updatedEntity = entity.set("PartitionKey", this[PartitionKey]);
 
                 return new Promise(function (res, rej) {
-                    _this[STORAGE_CLIENT].insertEntity(_this[TABLE_NAME], updatedEntity.toJS(), function (error, result) {
+                    _this[StorageClient].insertEntity(_this[TableName], updatedEntity.toJS(), function (error, result) {
                         if (error) rej(error);else {
                             res(result);
                         }
@@ -96,7 +97,7 @@ var AzureTableRepository = (function () {
                 validateString(rowkey);
 
                 return new Promise(function (res, rej) {
-                    _this[STORAGE_CLIENT].retrieveEntity(_this[TABLE_NAME], _this[PARTITION_KEY], rowkey, function (error, result) {
+                    _this[StorageClient].retrieveEntity(_this[TableName], _this[PartitionKey], rowkey, function (error, result) {
                         if (error) rej(error);else {
                             res(AzureTableEntity.createEntityFromSource(result));
                         }
@@ -112,7 +113,7 @@ var AzureTableRepository = (function () {
                 validateEntity(entity);
 
                 return new Promise(function (res, rej) {
-                    _this[STORAGE_CLIENT].updateEntity(_this[TABLE_NAME], entity.toJS(), function (error, result) {
+                    _this[StorageClient].updateEntity(_this[TableName], entity.toJS(), function (error, result) {
                         if (error) rej(error);else {
                             res(result);
                         }
@@ -128,7 +129,7 @@ var AzureTableRepository = (function () {
                 validateEntity(entity);
 
                 return new Promise(function (res, rej) {
-                    _this[STORAGE_CLIENT].deleteEntity(_this[TABLE_NAME], entity.toJS(), function (error, result) {
+                    _this[StorageClient].deleteEntity(_this[TableName], entity.toJS(), function (error, result) {
                         if (error) rej(error);else {
                             res(result);
                         }
@@ -139,10 +140,11 @@ var AzureTableRepository = (function () {
             configurable: true
         },
         Query: {
-            value: function Query(query) {
+            value: function Query() {
                 var _this = this;
+                var query = arguments[0] === undefined ? new TableQuery() : arguments[0];
                 return new Promise(function (res, rej) {
-                    _this[STORAGE_CLIENT].queryEntities(_this[TABLE_NAME], query, null, function (error, result, response) {
+                    _this[StorageClient].queryEntities(_this[TableName], query, null, function (error, result, response) {
                         if (error) rej(error);else {
                             var entitys = result.entries.map(AzureTableEntity.createEntityFromSource);
 
@@ -158,7 +160,7 @@ var AzureTableRepository = (function () {
             value: function Batch(batch) {
                 var _this = this;
                 return new Promise(function (res, rej) {
-                    _this[STORAGE_CLIENT].executeBatch(_this[TABLE_NAME], batch, function (error, result, response) {
+                    _this[StorageClient].executeBatch(_this[TableName], batch, function (error, result, response) {
                         if (error) rej(error);else {
                             res(result);
                         }

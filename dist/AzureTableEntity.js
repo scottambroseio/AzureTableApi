@@ -17,26 +17,26 @@ var Immutable = _interopRequire(require("Immutable"));
 
 var uuid = _interopRequire(require("node-uuid"));
 
-var entityGenerator = TableUtilities.entityGenerator;
+var EntityGenerator = TableUtilities.entityGenerator;
 
 
-var VALUE = Symbol();
+var Value = Symbol();
 
 var AzureTableEntity = (function () {
 	function AzureTableEntity() {
 		_classCallCheck(this, AzureTableEntity);
 
-		this[VALUE] = Immutable.OrderedMap({ RowKey: entityGenerator.String(uuid()) });
+		this[Value] = Immutable.OrderedMap({ RowKey: EntityGenerator.String(uuid()) });
 	}
 
 	_prototypeProperties(AzureTableEntity, {
 		createEntityFromSource: {
 			value: function createEntityFromSource(source) {
-				var entity = new AzureTableEntity();
+				var Entity = new AzureTableEntity();
 
-				entity[VALUE] = Immutable.OrderedMap(source);
+				Entity[Value] = Immutable.OrderedMap(source);
 
-				return entity;
+				return Entity;
 			},
 			writable: true,
 			configurable: true
@@ -44,14 +44,14 @@ var AzureTableEntity = (function () {
 	}, {
 		get: {
 			value: function get(key) {
-				return this[VALUE].get(key)._;
+				return this[Value].get(key)._;
 			},
 			writable: true,
 			configurable: true
 		},
 		set: {
 			value: function set(key, value) {
-				this[VALUE] = this[VALUE].set(key, getEdmValue(value));
+				this[Value] = this[Value].set(key, getEdmValue(value));
 
 				return this;
 			},
@@ -60,7 +60,7 @@ var AzureTableEntity = (function () {
 		},
 		toJS: {
 			value: function toJS() {
-				return this[VALUE].toJS();
+				return this[Value].toJS();
 			},
 			writable: true,
 			configurable: true
@@ -75,14 +75,14 @@ module.exports = AzureTableEntity;
 
 function getEdmValue(value) {
 	if (isString(value)) {
-		return entityGenerator.String(value);
+		return EntityGenerator.String(value);
 	}if (isNumber(value) && value % 1 === 0) {
-		return entityGenerator.Int32(value);
+		return EntityGenerator.Int32(value);
 	}if (isNumber(value) && value % 1 !== 0) {
-		return entityGenerator.Double(value);
+		return EntityGenerator.Double(value);
 	}if (isBoolean(value)) {
-		return entityGenerator.Boolean(value);
+		return EntityGenerator.Boolean(value);
 	}if (isDate(value)) {
-		return entityGenerator.DateTime(value);
+		return EntityGenerator.DateTime(value);
 	}throw "The values data type isn't currently supported";
 }

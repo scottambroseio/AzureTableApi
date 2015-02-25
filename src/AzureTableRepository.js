@@ -1,9 +1,9 @@
-import { createTableService, generateDevelopmentStorageCredendentials } from 'azure-storage';
+import { createTableService, generateDevelopmentStorageCredendentials, TableQuery } from 'azure-storage';
 import { each } from 'lodash';
 import AzureTableEntity from "./AzureTableEntity";
 import nconf from 'nconf';
 
-nconf.env().file({ file: 'config.json' });
+nconf.env().file({ file: '../config.json' });
 
 function validateConstructorArgs(tableName, partitionKey) {
     if (arguments.length < 2)
@@ -20,16 +20,16 @@ function validateString(string) {
     if (typeof(string) !== "string" || !string) throw "Invalid string";
 }
 
-let TABLE_NAME = Symbol();
-let PARTITION_KEY = Symbol();
-let STORAGE_CLIENT = Symbol();
+let TableName = Symbol();
+let PartitionKey = Symbol();
+let StorageClient = Symbol();
 
 export default class AzureTableRepository {
     constructor(tableName, partitionKey) {
         validateConstructorArgs.apply(null, arguments);
 
         if (nconf.get("NODE_ENV") === "debug") {
-            this[STORAGE_CLIENT] = createTableService(generateDevelopmentStorageCredendentials());
+            this[StorageClient] = createTableService(generateDevelopmentStorageCredendentials());
         } else {
             let accountName = nconf.get("STORAGE_NAME");
             let accountKey = nconf.get("STORAGE_KEY");
@@ -37,16 +37,16 @@ export default class AzureTableRepository {
             validateString(accountName);
             validateString(accountKey);
 
-            this[STORAGE_CLIENT] = createTableService(accountName, accountKey);
+            this[StorageClient] = createTableService(accountName, accountKey);
         }
 
-        this[TABLE_NAME] = tableName;
-        this[PARTITION_KEY] = partitionKey;
+        this[TableName] = tableName;
+        this[PartitionKey] = partitionKey;
     }
 
     Init() {
         return new Promise((res, rej) => {
-            this[STORAGE_CLIENT].createTableIfNotExists(this[TABLE_NAME], error => {
+            this[StorageClient].createTableIfNotExists(this[TableName], error => {
                 if (error)
                     rej(error);
                 else {
@@ -59,10 +59,10 @@ export default class AzureTableRepository {
     Create(entity) {
         validateEntity(entity);
 
-        let updatedEntity = entity.set('PartitionKey', this[PARTITION_KEY]);
+        let updatedEntity = entity.set('PartitionKey', this[PartitionKey]);
 
         return new Promise((res, rej) => {
-            this[STORAGE_CLIENT].insertEntity(this[TABLE_NAME], updatedEntity.toJS(), (error, result) => {
+            this[StorageClient].insertEntity(this[TableName], updatedEntity.toJS(), (error, result) => {
                 if (error)
                     rej(error);
                 else {
@@ -76,7 +76,7 @@ export default class AzureTableRepository {
         validateString(rowkey);
 
         return new Promise((res, rej) => {
-            this[STORAGE_CLIENT].retrieveEntity(this[TABLE_NAME], this[PARTITION_KEY], rowkey, (error, result) => {
+            this[StorageClient].retrieveEntity(this[TableName], this[PartitionKey], rowkey, (error, result) => {
                 if (error)
                     rej(error);
                 else {
@@ -90,7 +90,7 @@ export default class AzureTableRepository {
         validateEntity(entity);
 
         return new Promise((res, rej) => {
-            this[STORAGE_CLIENT].updateEntity(this[TABLE_NAME], entity.toJS(), (error, result) => {
+            this[StorageClient].updateEntity(this[TableName], entity.toJS(), (error, result) => {
                 if (error)
                     rej(error);
                 else {
@@ -104,7 +104,7 @@ export default class AzureTableRepository {
         validateEntity(entity);
 
         return new Promise((res, rej) => {
-            this[STORAGE_CLIENT].deleteEntity(this[TABLE_NAME], entity.toJS(), (error, result) => {
+            this[StorageClient].deleteEntity(this[TableName], entity.toJS(), (error, result) => {
                 if (error)
                     rej(error);
                 else {
@@ -114,9 +114,9 @@ export default class AzureTableRepository {
         });
     }
 
-    Query(query) {
+    Query(query = new TableQuery()) {
         return new Promise((res, rej) => {
-            this[STORAGE_CLIENT].queryEntities(this[TABLE_NAME], query, null, (error, result, response) => {
+            this[StorageClient].queryEntities(this[TableName], query, null, (error, result, response) => {
                 if (error)
                     rej(error);
                 else {
@@ -130,7 +130,7 @@ export default class AzureTableRepository {
 
     Batch(batch) {
         return new Promise((res, rej) => {
-            this[STORAGE_CLIENT].executeBatch(this[TABLE_NAME], batch, (error, result, response) => {
+            this[StorageClient].executeBatch(this[TableName], batch, (error, result, response) => {
                 if (error)
                     rej(error);
                 else {
