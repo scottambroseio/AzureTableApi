@@ -5,18 +5,18 @@
   "author": "Scott Ranger",
   "main": "dist/AzureTableApi.js",
   "dependencies": {
-    "azure-storage": "^0.4.2",
+    "azure-storage": "^2.1.0",
     "immutable": "^3.6.2",
-    "lodash": "^3.1.0",
-    "nconf": "^0.7.1",
+    "lodash": "^4.17.4",
+    "nconf": "^0.8.4",
     "node-uuid": "^1.4.2"
   },
   "devDependencies": {
     "co": "^4.3.1",
     "gulp": "^3.8.11",
-    "gulp-babel": "^4.0.0",
-    "mocha": "^2.1.0",
-    "should": "^5.0.0"
+    "gulp-babel": "^6.1.2",
+    "mocha": "^3.3.0",
+    "should": "^11.2.1"
   },
   "scripts": {
     "test": "mocha --harmony"
